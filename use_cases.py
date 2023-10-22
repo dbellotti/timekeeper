@@ -67,53 +67,45 @@ class ToggleTrackingInteractor:
         project = self.project_repo.load(project_name)
 
         if project.last_time_entry_is_open():
-            return StopTracking(project).execute()
+            return EndTracking(project).execute()
         else:
             return StartTracking(project).execute()
 
 
-class StartTracking:
+class TrackTime:
     def __init__(self, project_repo: ProjectFileRepository):
         self.project_repo = project_repo
 
     def execute(self, project_name: str):
         project = self.project_repo.load(project_name)
-        time_entry = self._make_start_time_entry(project)
-        project.add_time_entry(time_entry)
-        print(f"Started tracking for {project} at {time_entry.start_time}.")
+        self._make_time_entry(project)
         self.project_repo.save(project)
 
-    def _make_start_time_entry(self, project):
-        return TimeEntry(
-            self._default_role(project).name, str(self._get_datetime()), None
-        )
+    def _make_time_entry(self, project) -> None:
+        raise NotImplementedError
+
+    def _default_role(self, project):
+        # assuming the first role is the default role
+        return project.roles[0]
 
     def _get_datetime(self):
         return datetime.now()
 
-    def _default_role(self, project):
-        # assuming the first role is the default role
-        return project.roles[0]
+
+class StartTracking(TrackTime):
+    def _make_time_entry(self, project) -> None:
+        time_entry = TimeEntry(
+            self._default_role(project).name, str(self._get_datetime()), None
+        )
+        project.add_time_entry(time_entry)
+        print(f"Started tracking for {project} at {time_entry.start_time}.")
 
 
-class StopTracking:
-    def __init__(self, project_repo: ProjectFileRepository):
-        self.project_repo = project_repo
-
-    def execute(self, project_name: str):
-        project = self.project_repo.load(project_name)
-        time_entry = self._make_end_time_entry(project)
-        print(f"Stopped tracking for {project} at {time_entry.start_time}.")
-        self.project_repo.save(project)
-
-    def _make_end_time_entry(self, project):
+class StopTracking(TrackTime):
+    def _make_time_entry(self, project) -> None:
         time_entry = project.time_entries[-1]
-        time_entry.end_time = str(datetime.now())
-        return time_entry
-
-    def _default_role(self, project):
-        # assuming the first role is the default role
-        return project.roles[0]
+        time_entry.end_time = str(self._get_datetime())
+        print(f"Stopped tracking for {project} at {time_entry.start_time}.")
 
 
 class SummarizeTime:

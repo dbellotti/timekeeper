@@ -7,7 +7,7 @@ from unittest.mock import patch
 
 from adapters import ProjectFileRepository
 from entities import Project, Role, TimeEntry
-from use_cases import InitializeProjectWizard, StartTracking
+from use_cases import InitializeProjectWizard, StartTracking, StopTracking
 
 
 def destroy_repo(repo_dirname):
@@ -97,12 +97,38 @@ class StartTrackingTests(unittest.TestCase):
         repo.save(project)
         StartTracking(repo).execute(project.name)
         project = repo.load(project.name)
+        entry = project.time_entries[0]
         self.assertEqual(len(project.time_entries), 1)
-        self.assertEqual(project.time_entries[0].role_name, "some-role")
-        self.assertEqual(
-            project.time_entries[0].start_time, str(datetime(2023, 1, 1, 12, 0, 0))
-        )
-        self.assertIsNone(project.time_entries[0].end_time)
+        self.assertEqual(entry.role_name, "some-role")
+        self.assertEqual(entry.start_time, str(datetime(2023, 1, 1, 12, 0, 0)))
+        self.assertIsNone(entry.end_time)
+
+
+class StopTrackingTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self.repo_dirname = "test_repo"
+
+    def tearDown(self) -> None:
+        destroy_repo(self.repo_dirname)
+
+    @patch("builtins.print")
+    @patch(
+        "use_cases.TrackTime._get_datetime",
+        return_value=datetime(2023, 1, 1, 12, 0),
+    )
+    def test_execute(self, mock_datetime, mock_print) -> None:
+        project = Project(name="some-project")
+        project.add_role(Role(name="some-role", hourly_rate=100))
+        repo = ProjectFileRepository(self.repo_dirname)
+        repo.save(project)
+        StartTracking(repo).execute(project.name)
+        StopTracking(repo).execute(project.name)
+        project = repo.load(project.name)
+        entry = project.time_entries[-1]
+        self.assertEqual(len(project.time_entries), 1)
+        self.assertEqual(entry.role_name, "some-role")
+        self.assertEqual(entry.start_time, str(datetime(2023, 1, 1, 12, 0)))
+        self.assertEqual(entry.end_time, str(datetime(2023, 1, 1, 12, 0, 0)))
 
 
 if __name__ == "__main__":
