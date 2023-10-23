@@ -71,10 +71,10 @@ class CommandLineInterface:
             exit(e)
 
     def toggle_tracking(self, project_name):
-        print(ToggleTrackingInteractor(self.project_repo).execute(project_name))
+        ToggleTrackingInteractor(self.project_repo).execute(project_name)
 
     def summarize_time(self, period, project_name=None, precise=False):
-        print(SummarizeTime(self.project_repo).execute(period, project_name, precise))
+        SummarizeTime(self.project_repo).execute(period, project_name, precise)
 
 
 if __name__ == "__main__":

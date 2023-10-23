@@ -66,10 +66,15 @@ class ToggleTrackingInteractor:
     def execute(self, project_name):
         project = self.project_repo.load(project_name)
 
+        # TODO
+        # this loads the project from the repo to check the last time entry
+        # and then it loads the project again in the StartTracking or StopTracking
+        # these both need to save the project to the repo so...
+        # potentially have that loading and saving happen in the interactor only
         if project.last_time_entry_is_open():
-            return StopTracking(project).execute()
+            return StopTracking(self.project_repo).execute(project_name)
         else:
-            return StartTracking(project).execute()
+            return StartTracking(self.project_repo).execute(project_name)
 
 
 class TrackTime:

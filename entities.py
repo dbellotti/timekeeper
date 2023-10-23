@@ -30,4 +30,6 @@ class Project:
         self.time_entries.append(time_entry)
 
     def last_time_entry_is_open(self):
-        return self.time_entries[-1].end_time is None
+        if self.time_entries and self.time_entries[-1].end_time is None:
+            return True
+        return False
