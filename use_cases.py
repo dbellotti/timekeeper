@@ -67,7 +67,7 @@ class ToggleTrackingInteractor:
         project = self.project_repo.load(project_name)
 
         if project.last_time_entry_is_open():
-            return EndTracking(project).execute()
+            return StopTracking(project).execute()
         else:
             return StartTracking(project).execute()
 

@@ -1,5 +1,4 @@
 import argparse
-import os
 
 from adapters import ProjectFileRepository
 from use_cases import (
