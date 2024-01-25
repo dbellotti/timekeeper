@@ -7,7 +7,12 @@ from unittest.mock import patch
 
 from adapters import ProjectFileRepository
 from entities import Project, Role, TimeEntry
-from use_cases import InitializeProjectWizard, StartTracking, StopTracking
+from use_cases import (
+    InitializeProjectWizard,
+    StartTracking,
+    StopTracking,
+    SummarizeTime,
+)
 
 
 def destroy_repo(repo_dirname):

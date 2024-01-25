@@ -1,8 +1,17 @@
 import os
-from datetime import datetime
+from collections import defaultdict
+from datetime import datetime, timedelta
 
 from adapters import ProjectFileRepository
 from entities import Project, Role, TimeEntry
+
+
+class ProjectNotFoundError(Exception):
+    """Exception raised when a project is not found."""
+
+
+class RoleNotFoundError(Exception):
+    """Exception raised when a role is not found."""
 
 
 class UserQuitException(Exception):
@@ -65,6 +74,9 @@ class ToggleTrackingInteractor:
 
     def execute(self, project_name):
         project = self.project_repo.load(project_name)
+
+        if not project:
+            raise ProjectNotFoundError(f'Project "{project_name}" does not exist.')
 
         # TODO
         # this loads the project from the repo to check the last time entry

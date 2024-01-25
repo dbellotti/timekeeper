@@ -3,6 +3,8 @@ import argparse
 from adapters import ProjectFileRepository
 from use_cases import (
     InitializeProjectWizard,
+    ProjectNotFoundError,
+    RoleNotFoundError,
     SummarizeTime,
     ToggleTrackingInteractor,
     UserQuitException,
@@ -78,5 +80,9 @@ class CommandLineInterface:
 
 
 if __name__ == "__main__":
-    cli = CommandLineInterface()
-    cli.run()
+    try:
+        cli = CommandLineInterface()
+        cli.run()
+    except Exception as e:
+        print(e)
+        exit(1)

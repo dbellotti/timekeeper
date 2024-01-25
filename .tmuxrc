@@ -4,4 +4,3 @@ send "source .venv/bin/activate.fish" C-m
 send "python3 ./timekeeper.py --help" C-m
 new-window -n nvim
 send "source .venv/bin/activate.fish"
-send "nvim ." C-m
