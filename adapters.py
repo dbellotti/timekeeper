@@ -8,12 +8,16 @@ from entities import Project, Role, TimeEntry
 class ProjectNotFoundError(Exception):
     """Exception raised when a project is not found."""
 
+    def __init__(self, project_name: str):
+        self.project_name = project_name
+        super().__init__(f'Project "{project_name}" does not exist.')
+
 
 class ProjectFileRepository:
     def __init__(self, base_path):
         if not os.path.exists(base_path):
             os.makedirs(base_path)
-            # print(f"Created repo directory: {base_path}")
+            print(f"Created repo directory: {base_path}")
         self.base_path = base_path
 
     def path(self, project_name):
@@ -27,8 +31,7 @@ class ProjectFileRepository:
                 project_dict = json.load(f)
             return self._load_objects(project_dict)
         else:
-            raise ProjectNotFoundError(f'Project "{project_name}" does not exist.')
-        return None
+            raise ProjectNotFoundError(project_name)
 
     def save(self, project):
         project_path = self.path(project.name)

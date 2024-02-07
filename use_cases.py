@@ -6,12 +6,11 @@ from adapters import ProjectFileRepository
 from entities import Project, Role, TimeEntry
 
 
-class RoleNotFoundError(Exception):
-    """Exception raised when a role is not found."""
-
-
 class UserQuitException(Exception):
     """Exception raised when an invalid time is provided."""
+
+    def __init__(self):
+        super().__init__("\n...project creation abandoned, goodbye")
 
 
 class InitializeProjectWizard:
@@ -42,7 +41,7 @@ class InitializeProjectWizard:
                 "Do you want to add a new role/rate or quit? Enter 'role' to add a role or 'quit' to exit: "
             ).lower()
             if action == "quit":
-                raise UserQuitException("...project creation abandoned, goodbye")
+                raise UserQuitException
             return self.project_repo.load(project_name)
         return Project(name=project_name)
 
@@ -53,7 +52,7 @@ class InitializeProjectWizard:
                 "Enter a different name for the role or type 'quit' to exit: "
             )
             if role_name.lower() == "quit":
-                raise UserQuitException("...project creation abandoned, goodbye")
+                raise UserQuitException
             else:
                 return role_name
 
