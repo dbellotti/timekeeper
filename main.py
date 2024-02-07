@@ -3,11 +3,8 @@ import argparse
 from adapters import ProjectFileRepository
 from use_cases import (
     InitializeProjectWizard,
-    ProjectNotFoundError,
-    RoleNotFoundError,
     SummarizeTime,
     ToggleTrackingInteractor,
-    UserQuitException,
 )
 
 
@@ -30,7 +27,7 @@ class CommandLineInterface:
             "project_name", type=str, help="Name of the project."
         )
         parser_toggle.add_argument(
-            "role", type=str, help="The role you want to tracking time for."
+            "role", type=str, help="The role you want to tracking time for.", nargs="?"
         )
 
         # sum subcommand
@@ -58,22 +55,17 @@ class CommandLineInterface:
             # TODO
             # make sure saving does a complete replace instead of append
             # handle non default roles
-            self.toggle_tracking(args.project_name)
+            self.toggle_tracking(args.project_name, args.role)
         elif args.command == "sum":
-            # TODO
             self.summarize_time(args.period, args.project, args.precise)
         else:
             parser.print_help()
 
     def init_project(self):
-        try:
-            InitializeProjectWizard(self.project_repo).execute()
-        except UserQuitException as e:
-            print()
-            exit(e)
+        InitializeProjectWizard(self.project_repo).execute()
 
-    def toggle_tracking(self, project_name):
-        ToggleTrackingInteractor(self.project_repo).execute(project_name)
+    def toggle_tracking(self, project_name, role_name=None):
+        ToggleTrackingInteractor(self.project_repo).execute(project_name, role_name)
 
     def summarize_time(self, period, project_name=None, precise=False):
         SummarizeTime(self.project_repo).execute(period, project_name, precise)
@@ -84,5 +76,4 @@ if __name__ == "__main__":
         cli = CommandLineInterface()
         cli.run()
     except Exception as e:
-        print(e)
-        exit(1)
+        exit(e)

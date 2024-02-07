@@ -6,10 +6,6 @@ from adapters import ProjectFileRepository
 from entities import Project, Role, TimeEntry
 
 
-class ProjectNotFoundError(Exception):
-    """Exception raised when a project is not found."""
-
-
 class RoleNotFoundError(Exception):
     """Exception raised when a role is not found."""
 
@@ -35,12 +31,6 @@ class InitializeProjectWizard:
         if hourly_rate == "":
             hourly_rate = 0
         project.add_role(Role(name=role_name, hourly_rate=int(hourly_rate)))
-
-        # TODO
-        # not sure the format to save the project, currently just dumping the project
-        # dict we'll need to make sure saving and retrieving time entries
-        # (for ToggleTrackingInteractor) matches the format in the older version
-        # of time_tracking.json
         self.project_repo.save(project)
         print(f'\n\tRole "{role_name}" added with rate of ${hourly_rate}/hour.\n')
         return project
@@ -57,7 +47,7 @@ class InitializeProjectWizard:
         return Project(name=project_name)
 
     def _find_or_get_role_name(self, project, role_name):
-        while any(role_name == role["name"] for role in project.roles):
+        while project.has_role(role_name):
             print(f"Role {role_name} already exists.")
             role_name = input(
                 "Enter a different name for the role or type 'quit' to exit: "
@@ -69,62 +59,82 @@ class InitializeProjectWizard:
 
 
 class ToggleTrackingInteractor:
-    def __init__(self, project_repo):
+    def __init__(self, project_repo: str) -> None:
         self.project_repo = project_repo
 
-    def execute(self, project_name):
+    def execute(self, project_name: str, role_name: str) -> None:
         project = self.project_repo.load(project_name)
+        role = project.get_role(role_name)
 
-        if not project:
-            raise ProjectNotFoundError(f'Project "{project_name}" does not exist.')
-
-        # TODO
-        # this loads the project from the repo to check the last time entry
-        # and then it loads the project again in the StartTracking or StopTracking
-        # these both need to save the project to the repo so...
-        # potentially have that loading and saving happen in the interactor only
-        if project.last_time_entry_is_open():
-            return StopTracking(self.project_repo).execute(project_name)
+        if project.last_time_entry_is_open(role):
+            StopTracking.execute(project, role)
         else:
-            return StartTracking(self.project_repo).execute(project_name)
+            StartTracking.execute(project, role)
 
-
-class TrackTime:
-    def __init__(self, project_repo: ProjectFileRepository):
-        self.project_repo = project_repo
-
-    def execute(self, project_name: str):
-        project = self.project_repo.load(project_name)
-        self._make_time_entry(project)
         self.project_repo.save(project)
 
-    def _make_time_entry(self, project) -> None:
-        raise NotImplementedError
 
-    def _default_role(self, project):
-        # assuming the first role is the default role
-        return project.roles[0]
-
-    def _get_datetime(self):
-        return datetime.now()
-
-
-class StartTracking(TrackTime):
-    def _make_time_entry(self, project) -> None:
-        time_entry = TimeEntry(
-            self._default_role(project).name, str(self._get_datetime()), None
-        )
-        project.add_time_entry(time_entry)
+class StartTracking:
+    def execute(project: Project, role: Role) -> None:
+        time_entry = TimeEntry(role.name)
+        time_entry.start()
+        project.start_time_entry(time_entry)
         print(f"Started tracking for {project} at {time_entry.start_time}.")
 
 
-class StopTracking(TrackTime):
-    def _make_time_entry(self, project) -> None:
-        time_entry = project.time_entries[-1]
-        time_entry.end_time = str(self._get_datetime())
-        print(f"Stopped tracking for {project} at {time_entry.start_time}.")
+class StopTracking:
+    def execute(project: Project, role: Role) -> None:
+        time_entry = project.get_last_time_entry(role.name)
+        time_entry.finish()
+        print(f"Stopped tracking for {project} at {time_entry.end_time}.")
 
 
 class SummarizeTime:
-    # Implementation details to calculate and summarize time.
-    pass
+    def __init__(self, project_repo: ProjectFileRepository) -> None:
+        self.project_repo = project_repo
+
+    def execute(self, period: str, project_name: str, precise=False) -> None:
+        project = self.project_repo.load(project_name)
+        period_summary = defaultdict(lambda: defaultdict(timedelta))
+
+        for time_entry in project.time_entries:
+            if time_entry.is_closed():
+                start = datetime.fromisoformat(time_entry.start_time)
+                end = datetime.fromisoformat(time_entry.end_time)
+                delta = end - start
+
+                if period == "daily":
+                    key = self._daily_key(start.date())
+                elif period == "weekly":
+                    key = self._weekly_key(start.date())
+                elif period == "monthly":
+                    key = self._monthly_key(start.date())
+                else:
+                    print("Invalid period")
+                    return
+
+                period_summary[key][time_entry.role_name] += delta
+
+        print(f'{period} summary for "{project_name}"')
+        for key, role_names in sorted(period_summary.items()):
+            print(f"\n{key}:")
+            for role_name, total_time in role_names.items():
+                total_hours = total_time.total_seconds() / 3600
+                formatted_total_time = f"{total_hours:.2f}"
+                print(f"  {role_name}: {formatted_total_time}")
+
+    def _daily_key(self, start_date: datetime) -> datetime:
+        weekday_name = start_date.strftime("%A")
+        return f"{start_date} ({weekday_name})"
+
+    def _weekly_key(self, start_date: datetime) -> str:
+        # Get the date of the beginning of the week
+        start_of_week = start_date - timedelta(days=start_date.weekday())
+        start_of_week_str = start_of_week.strftime("%Y-%m-%d")
+        week_number = start_date.isocalendar()[1]
+        return f"{start_of_week_str} ({week_number})"
+
+    def _monthly_key(self, start_date: datetime) -> datetime:
+        start_of_month = start_date.replace(day=1)
+        month_name = start_of_month.strftime("%B")
+        return f"{start_of_month} ({month_name})"
