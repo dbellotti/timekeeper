@@ -3,8 +3,12 @@ from collections import defaultdict
 from datetime import datetime, timedelta
 
 from adapters import ProjectFileRepository
-from entities import Project, Role, TimeEntry
-from errors import UserQuitException
+from entities import Project, Role
+from errors import (
+    PreviousTimeEntryClosedException,
+    PreviousTimeEntryOpenException,
+    UserQuitException,
+)
 
 
 class InitializeProjectWizard:
@@ -68,18 +72,29 @@ class ToggleTrackingInteractor:
 
 
 class StartTracking:
+    @staticmethod
     def execute(project: Project, role: Role) -> None:
-        time_entry = TimeEntry(role.name)
-        time_entry.start()
-        project.start_time_entry(time_entry)
-        print(f"Started tracking at {time_entry.start_time}")
+        StartTracking.raise_errors(project, role.name)
+        project.start_time_entry(role.name)
+        print(f"Started tracking at {project.last_time_entry().start_time}")
+
+    @staticmethod
+    def raise_errors(project: Project, role_name: str) -> None:
+        if project.last_time_entry(role_name).is_open():
+            raise PreviousTimeEntryOpenException
 
 
 class StopTracking:
+    @staticmethod
     def execute(project: Project, role: Role) -> None:
-        time_entry = project.last_time_entry(role.name)
-        time_entry.finish()
-        print(f"Stopped tracking at {time_entry.end_time}")
+        StopTracking.raise_errors(project, role.name)
+        project.end_time_entry(role.name)
+        print(f"Stopped tracking at {project.last_time_entry().end_time}")
+
+    @staticmethod
+    def raise_errors(project: Project, role_name: str) -> None:
+        if project.last_time_entry(role_name).is_closed():
+            raise PreviousTimeEntryClosedException
 
 
 class SummarizeTime:

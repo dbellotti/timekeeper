@@ -19,3 +19,17 @@ class UserQuitException(Exception):
 
     def __init__(self):
         super().__init__("\n...project creation abandoned, goodbye")
+
+
+class PreviousTimeEntryOpenException(Exception):
+    """Exception raised when a previous time entry is open."""
+
+    def __init__(self):
+        super().__init__("Previous time entry is still open.")
+
+
+class PreviousTimeEntryClosedException(Exception):
+    """Exception raised when a previous time entry is closed."""
+
+    def __init__(self):
+        super().__init__("Previous time entry is already closed.")
