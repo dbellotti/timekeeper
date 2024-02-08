@@ -4,13 +4,7 @@ from datetime import datetime, timedelta
 
 from adapters import ProjectFileRepository
 from entities import Project, Role, TimeEntry
-
-
-class UserQuitException(Exception):
-    """Exception raised when an invalid time is provided."""
-
-    def __init__(self):
-        super().__init__("\n...project creation abandoned, goodbye")
+from errors import UserQuitException
 
 
 class InitializeProjectWizard:

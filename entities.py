@@ -1,13 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 
-
-class RoleNotFoundError(Exception):
-    """Exception raised when a role is not found."""
-
-    def __init__(self, role_name: str):
-        self.role_name = role_name
-        super().__init__(f'Role "{role_name}" does not exist.')
+from errors import RoleNotFoundError
 
 
 @dataclass

@@ -3,14 +3,7 @@ import os
 from dataclasses import asdict
 
 from entities import Project, Role, TimeEntry
-
-
-class ProjectNotFoundError(Exception):
-    """Exception raised when a project is not found."""
-
-    def __init__(self, project_name: str):
-        self.project_name = project_name
-        super().__init__(f'Project "{project_name}" does not exist.')
+from errors import ProjectNotFoundError
 
 
 class ProjectFileRepository:
