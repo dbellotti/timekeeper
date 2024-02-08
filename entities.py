@@ -50,17 +50,21 @@ class Project:
     def __str__(self) -> str:
         return self.name
 
+    def get_role(self, role_name: str) -> Role:
+        if role_name:
+            for role in self.roles:
+                if role.name == role_name:
+                    return role
+        raise RoleNotFoundError(role_name)
+
+    def get_default_role(self) -> Role:
+        return self.roles[0]
+
+    def has_role(self, role_name: str) -> bool:
+        return role_name in [role.name for role in self.roles]
+
     def add_role(self, role: Role) -> None:
         self.roles.append(role)
-
-    def start_time_entry(self, role_name: str) -> None:
-        time_entry = TimeEntry(role_name)
-        time_entry.start()
-        self.time_entries.append(time_entry)
-
-    def end_time_entry(self, role_name: str) -> None:
-        time_entry = self.last_time_entry(role_name)
-        time_entry.finish()
 
     def last_time_entry(self, role_name: str = None) -> TimeEntry:
         if role_name:
@@ -76,19 +80,11 @@ class Project:
         else:
             return TimeEntry()
 
-    def get_role(self, role_name: str) -> Role:
-        if role_name:
-            for role in self.roles:
-                if role.name == role_name:
-                    return role
-            raise RoleNotFoundError(role_name)
-        else:
-            role = self.get_default_role()
-            print(f"No role provided, using default role: {role.name}")
-            return role
+    def start_time_entry(self, role_name: str) -> None:
+        time_entry = TimeEntry(role_name)
+        time_entry.start()
+        self.time_entries.append(time_entry)
 
-    def get_default_role(self) -> Role:
-        return self.roles[0]
-
-    def has_role(self, role_name: str) -> bool:
-        return role_name in [role.name for role in self.roles]
+    def end_time_entry(self, role_name: str) -> None:
+        time_entry = self.last_time_entry(role_name)
+        time_entry.finish()

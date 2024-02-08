@@ -7,6 +7,7 @@ from entities import Project, Role
 from errors import (
     PreviousTimeEntryClosedException,
     PreviousTimeEntryOpenException,
+    RoleNotFoundError,
     UserQuitException,
 )
 
@@ -61,7 +62,12 @@ class ToggleTrackingInteractor:
 
     def execute(self, project_name: str, role_name: str) -> None:
         project = self.project_repo.load(project_name)
-        role = project.get_role(role_name)
+        try:
+            role = project.get_role(role_name)
+        except RoleNotFoundError:
+            print(f"Role {role_name} not found in project {project_name}.")
+            role = project.get_default_role()
+            print(f"Defaulting to role {role.name}.")
 
         if project.last_time_entry(role.name).is_open():
             StopTracking.execute(project, role)
