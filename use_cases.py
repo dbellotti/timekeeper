@@ -65,7 +65,7 @@ class ToggleTrackingInteractor:
         project = self.project_repo.load(project_name)
         role = project.get_role(role_name)
 
-        if project.last_time_entry_is_open(role):
+        if project.last_time_entry(role.name).is_open():
             StopTracking.execute(project, role)
         else:
             StartTracking.execute(project, role)
@@ -78,14 +78,14 @@ class StartTracking:
         time_entry = TimeEntry(role.name)
         time_entry.start()
         project.start_time_entry(time_entry)
-        print(f"Started tracking for {project} at {time_entry.start_time}.")
+        print(f"Started tracking at {time_entry.start_time}")
 
 
 class StopTracking:
     def execute(project: Project, role: Role) -> None:
-        time_entry = project.get_last_time_entry(role.name)
+        time_entry = project.last_time_entry(role.name)
         time_entry.finish()
-        print(f"Stopped tracking for {project} at {time_entry.end_time}.")
+        print(f"Stopped tracking at {time_entry.end_time}")
 
 
 class SummarizeTime:

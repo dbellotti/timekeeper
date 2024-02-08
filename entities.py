@@ -60,12 +60,13 @@ class Project:
         self.roles.append(role)
 
     def start_time_entry(self, new_time_entry: TimeEntry) -> None:
-        previous_time_entry = self.get_last_time_entry(new_time_entry.role_name)
+        previous_time_entry = self.last_time_entry(new_time_entry.role_name)
         if previous_time_entry.is_open():
             raise Exception("Previous time entry is still open.")
+
         self.time_entries.append(new_time_entry)
 
-    def get_last_time_entry(self, role_name: str = None) -> TimeEntry:
+    def last_time_entry(self, role_name: str = None) -> TimeEntry:
         if role_name:
             # get the time entries by role
             time_entries = [te for te in self.time_entries if role_name == te.role_name]
@@ -78,13 +79,6 @@ class Project:
             return time_entries[-1]
         else:
             return TimeEntry()
-
-    def last_time_entry_is_open(self, role: Role) -> bool:
-        time_entry = self.get_last_time_entry(role.name)
-        if time_entry.is_open():
-            return True
-        else:
-            return False
 
     def get_role(self, role_name: str) -> Role:
         if role_name:

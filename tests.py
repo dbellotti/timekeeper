@@ -163,11 +163,11 @@ class SummarizeTimeTests(unittest.TestCase):
             mock_print.call_args_list,
             [
                 call('daily summary for "some-project"'),
-                call("\n2023-01-01:"),
+                call("\n2023-01-01 (Sunday):"),
                 call("  some-role: 1.00"),
-                call("\n2023-01-02:"),
+                call("\n2023-01-02 (Monday):"),
                 call("  some-role: 1.00"),
-                call("\n2023-01-03:"),
+                call("\n2023-01-03 (Tuesday):"),
                 call("  another-role: 1.00"),
             ],
         )

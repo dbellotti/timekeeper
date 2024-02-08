@@ -1,11 +1,7 @@
 import argparse
 
 from adapters import ProjectFileRepository
-from use_cases import (
-    InitializeProjectWizard,
-    SummarizeTime,
-    ToggleTrackingInteractor,
-)
+from use_cases import InitializeProjectWizard, SummarizeTime, ToggleTrackingInteractor
 
 
 class CommandLineInterface:
@@ -43,32 +39,26 @@ class CommandLineInterface:
         parser_sum.add_argument(
             "--project", type=str, help="Display sum for specific project."
         )
-        parser_sum.add_argument(
-            "--precise", action="store_true", help="Display sum in ISO time format."
-        )
 
         args = parser.parse_args()
 
         if args.command == "init":
             self.init_project()
         elif args.command == "toggle":
-            # TODO
-            # make sure saving does a complete replace instead of append
-            # handle non default roles
             self.toggle_tracking(args.project_name, args.role)
         elif args.command == "sum":
-            self.summarize_time(args.period, args.project, args.precise)
+            self.summarize_time(args.period, args.project)
         else:
             parser.print_help()
 
-    def init_project(self):
+    def init_project(self) -> None:
         InitializeProjectWizard(self.project_repo).execute()
 
-    def toggle_tracking(self, project_name, role_name=None):
+    def toggle_tracking(self, project_name: str, role_name: str = None) -> None:
         ToggleTrackingInteractor(self.project_repo).execute(project_name, role_name)
 
-    def summarize_time(self, period, project_name=None, precise=False):
-        SummarizeTime(self.project_repo).execute(period, project_name, precise)
+    def summarize_time(self, period: str, project_name: str = None) -> None:
+        SummarizeTime(self.project_repo).execute(period, project_name)
 
 
 if __name__ == "__main__":
