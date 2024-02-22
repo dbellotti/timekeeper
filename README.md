@@ -1,7 +1,7 @@
 # timekeeper
 Basic time tracking by arbitrary project and role. Time entries stored in readable json format. 
 
-```bash
+```console
 $ python3 ./main.py --help
 usage: main.py [-h] {init,toggle,sum} ...
 
