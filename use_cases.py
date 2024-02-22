@@ -67,7 +67,7 @@ class ToggleTrackingInteractor:
         except RoleNotFoundError:
             print(f"Role {role_name} not found in project {project_name}.")
             role = project.get_default_role()
-            print(f"Defaulting to role {role.name}.")
+            print(f"Defaulted to role {role.name}.")
 
         if project.last_time_entry(role.name).is_open():
             StopTracking.execute(project, role)

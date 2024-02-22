@@ -44,8 +44,8 @@ class Project:
     """Represents a project with roles and time entries."""
 
     name: str
-    roles: [Role] = field(default_factory=list)
-    time_entries: [TimeEntry] = field(default_factory=list)
+    roles: list[Role] = field(default_factory=list)
+    time_entries: list[TimeEntry] = field(default_factory=list)
 
     def __str__(self) -> str:
         return self.name
