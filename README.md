@@ -20,7 +20,7 @@ options:
 # why
 I needed a quick and dirty time tracker for a project and I didn't want to set up
 some app with an account so I asked chatGPT to write a script that performed the
-things I needed, that turned into version ["0.1.0"](https://github.com/dbellotti/timekeeper/releases/tag/v0.1.0).
+things I needed, that turned into version [`0.1.0`](https://github.com/dbellotti/timekeeper/releases/tag/v0.1.0).
 
 Since then, I have been using this repo to demo and practice various engineering
 curiosities and skills. Version `0.2.0` demonstrates a move from imperative,
