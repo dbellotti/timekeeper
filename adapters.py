@@ -10,7 +10,6 @@ class ProjectFileRepository:
     def __init__(self, base_path):
         if not os.path.exists(base_path):
             os.makedirs(base_path)
-            # print(f"Created repo directory: {base_path}")
         self.base_path = base_path
 
     def path(self, project_name):
