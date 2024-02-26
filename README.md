@@ -1,5 +1,5 @@
 # timekeeper
-Basic time tracking by arbitrary project and role. Time entries stored in readable json format. 
+Basic time tracking cli for projects and roles. Time entries stored in readable json format. 
 
 ```console
 $ python3 ./main.py --help
