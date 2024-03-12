@@ -1,6 +1,7 @@
 {
     "recommendations": [
         "charliermarsh.ruff",
+        "jnoortheen.nix-ide",
         "ms-python.debugpy",
         "ms-python.python",
         "ms-python.vscode-pylance",
