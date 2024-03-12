@@ -1,5 +1,6 @@
 # timekeeper
-Basic time tracking cli for projects and roles. Time entries stored in readable json format. 
+
+Basic time tracking cli for projects and roles. Time entries stored in readable json format.
 
 ```console
 $ python3 ./main.py --help
@@ -15,4 +16,12 @@ positional arguments:
 
 options:
   -h, --help         show this help message and exit
+```
+
+## develop
+
+Nix shell available for convenience. Just ignore the following if you have a python workflow and don't want to learn nix. Otherwise, [install nix](https://github.com/DeterminateSystems/nix-installer) (with flakes enabled).
+
+```console
+$ nix develop --impure
 ```
