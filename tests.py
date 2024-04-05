@@ -171,7 +171,3 @@ class SummarizeTimeTests(unittest.TestCase):
                 call("  another-role: 1.00"),
             ],
         )
-
-
-if __name__ == "__main__":
-    unittest.main()

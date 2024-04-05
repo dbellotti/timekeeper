@@ -1,2 +1,2 @@
 [tool.ruff]
-target-version = "py311"
+target-version = "py312"
