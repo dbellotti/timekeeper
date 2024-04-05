@@ -41,9 +41,11 @@ class ProjectFileRepositoryTests(unittest.TestCase):
     def test_save_and_load(self):
         repo = ProjectFileRepository(self.repo_dirname)
         dt = str(datetime.now())
-        role = Role(name="el jefe", hourly_rate=100)
-        time_entry = TimeEntry(role_name=role.name, start_time=dt)
-        project = Project(name="timekeeper", roles=[role], time_entries=[time_entry])
+        project = Project(
+            name="timekeeper",
+            roles=[Role(name="el jefe", hourly_rate=100)],
+            time_entries=[TimeEntry(role_name="el jefe", start_time=dt)],
+        )
 
         repo.save(project)
         with open(repo.path(project.name), "r") as f:
@@ -63,6 +65,8 @@ class ProjectFileRepositoryTests(unittest.TestCase):
                 ],
             },
         )
+
+        self.assertEqual(project, repo.load(project))
 
 
 class TimeEntryTests(unittest.TestCase):

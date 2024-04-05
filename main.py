@@ -54,10 +54,10 @@ class CommandLineInterface:
     def init_project(self) -> None:
         InitializeProjectWizard(self.project_repo).execute()
 
-    def toggle_tracking(self, project_name: str, role_name: str = None) -> None:
+    def toggle_tracking(self, project_name: str, role_name: str = "") -> None:
         ToggleTrackingInteractor(self.project_repo).execute(project_name, role_name)
 
-    def summarize_time(self, period: str, project_name: str = None) -> None:
+    def summarize_time(self, period: str, project_name: str = "") -> None:
         SummarizeTime(self.project_repo).execute(period, project_name)
 
 
@@ -66,4 +66,4 @@ if __name__ == "__main__":
         cli = CommandLineInterface()
         cli.run()
     except Exception as e:
-        exit(e)
+        exit(str(e))

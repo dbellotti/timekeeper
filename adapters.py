@@ -34,8 +34,8 @@ class ProjectFileRepository:
 
     def _load_objects(self, project_dict: dict) -> Project:
         project = Project(**project_dict)
-        project.roles = [Role(**role_dict) for role_dict in project.roles]
+        project.roles = [Role(**role_dict) for role_dict in project_dict["roles"]]
         project.time_entries = [
-            TimeEntry(**te_dict) for te_dict in project.time_entries
+            TimeEntry(**te_dict) for te_dict in project_dict["time_entries"]
         ]
         return project

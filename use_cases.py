@@ -1,6 +1,6 @@
 import os
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 
 from adapters import ProjectFileRepository
 from entities import Project, Role
@@ -57,7 +57,7 @@ class InitializeProjectWizard:
 
 
 class ToggleTrackingInteractor:
-    def __init__(self, project_repo: str) -> None:
+    def __init__(self, project_repo: ProjectFileRepository) -> None:
         self.project_repo = project_repo
 
     def execute(self, project_name: str, role_name: str) -> None:
@@ -109,7 +109,7 @@ class SummarizeTime:
 
     def execute(self, period: str, project_name: str, precise=False) -> None:
         project = self.project_repo.load(project_name)
-        period_summary = defaultdict(lambda: defaultdict(timedelta))
+        period_summary: defaultdict = defaultdict(lambda: defaultdict(timedelta))
 
         for time_entry in project.time_entries:
             if time_entry.is_closed():
@@ -137,18 +137,18 @@ class SummarizeTime:
                 formatted_total_time = f"{total_hours:.2f}"
                 print(f"  {role_name}: {formatted_total_time}")
 
-    def _daily_key(self, start_date: datetime) -> datetime:
+    def _daily_key(self, start_date: date) -> str:
         weekday_name = start_date.strftime("%A")
         return f"{start_date} ({weekday_name})"
 
-    def _weekly_key(self, start_date: datetime) -> str:
+    def _weekly_key(self, start_date: date) -> str:
         # Get the date of the beginning of the week
         start_of_week = start_date - timedelta(days=start_date.weekday())
         start_of_week_str = start_of_week.strftime("%Y-%m-%d")
         week_number = start_date.isocalendar()[1]
         return f"{start_of_week_str} ({week_number})"
 
-    def _monthly_key(self, start_date: datetime) -> datetime:
+    def _monthly_key(self, start_date: date) -> str:
         start_of_month = start_date.replace(day=1)
         month_name = start_of_month.strftime("%B")
         return f"{start_of_month} ({month_name})"
