@@ -21,7 +21,6 @@
               ]))
 
               mypy
-              pre-commit
               ruff
             ];
           };
