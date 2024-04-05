@@ -22,6 +22,12 @@ options:
 
 Nix shell available for convenience. Just ignore the following if you have a python workflow and don't want to learn nix. Otherwise, [install nix](https://github.com/DeterminateSystems/nix-installer) (with flakes enabled).
 
-```console
-$ nix develop --impure
+```bash
+nix develop
+```
+
+### test
+
+```bash
+python3 -m unittest
 ```
