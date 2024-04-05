@@ -20,7 +20,7 @@ options:
 
 ## develop
 
-Nix shell available for convenience. Just ignore the following if you have a python workflow and don't want to learn nix. Otherwise, [install nix](https://github.com/DeterminateSystems/nix-installer) (with flakes enabled).
+Nix shell available for convenience. [install nix](https://github.com/DeterminateSystems/nix-installer) (with flakes enabled).
 
 ```bash
 nix develop

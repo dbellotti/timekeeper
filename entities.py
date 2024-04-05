@@ -30,7 +30,7 @@ class TimeEntry:
         self.end_time = str(self.now())
 
     def is_open(self) -> bool:
-        return self.start_time and self.end_time == ""
+        return bool(self.start_time and (self.end_time == ""))
 
     def is_closed(self) -> bool:
         return not self.is_open()
@@ -61,12 +61,12 @@ class Project:
         return self.roles[0]
 
     def has_role(self, role_name: str) -> bool:
-        return role_name in [role.name for role in self.roles]
+        return bool(role_name in [role.name for role in self.roles])
 
     def add_role(self, role: Role) -> None:
         self.roles.append(role)
 
-    def last_time_entry(self, role_name: str = None) -> TimeEntry:
+    def last_time_entry(self, role_name: str = "") -> TimeEntry:
         if role_name:
             # get the time entries by role
             time_entries = [te for te in self.time_entries if role_name == te.role_name]
