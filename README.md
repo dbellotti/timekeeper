@@ -18,16 +18,18 @@ options:
   -h, --help         show this help message and exit
 ```
 
+## dependencies
+
+[Devbox](https://www.jetpack.io/devbox/docs/installing_devbox/) is the only dependency, it requires and includes Nix Package Manager.
+
 ## develop
 
-Nix shell available for convenience. [install nix](https://github.com/DeterminateSystems/nix-installer) (with flakes enabled).
-
 ```bash
-nix develop
+devbox shell
 ```
 
 ### test
 
 ```bash
-python3 -m unittest
+devbox test
 ```
