@@ -31,5 +31,5 @@ devbox shell
 ### test
 
 ```bash
-devbox test
+devbox run test
 ```
