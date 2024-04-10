@@ -1,0 +1,16 @@
+{
+  "$schema": "https://raw.githubusercontent.com/jetpack-io/devbox/0.10.3/.schema/devbox.schema.json",
+  "packages": [
+    "python@3.12",
+    "mypy@latest",
+    "pre-commit@latest",
+    "ruff@latest"
+  ],
+  "shell": {
+    "init_hook": ["echo 'Welcome to devbox!' > /dev/null"],
+    "scripts": {
+      "test": ["python -m unittest"],
+      "clean": ["nix store gc"]
+    }
+  }
+}
