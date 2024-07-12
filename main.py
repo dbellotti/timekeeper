@@ -1,12 +1,12 @@
 import argparse
 
-from adapters import ProjectFileRepository
+from adapters import ProjectFileStorage
 from use_cases import InitializeProjectWizard, SummarizeTime, ToggleTrackingInteractor
 
 
 class CommandLineInterface:
     def __init__(self):
-        self.project_repo = ProjectFileRepository(".timekeeper")
+        self.project_storage = ProjectFileStorage(".timekeeper")
 
     def run(self):
         parser = argparse.ArgumentParser(description="Time tracking utility.")
@@ -52,18 +52,22 @@ class CommandLineInterface:
             parser.print_help()
 
     def init_project(self) -> None:
-        InitializeProjectWizard(self.project_repo).execute()
+        InitializeProjectWizard(self.project_storage).execute()
 
     def toggle_tracking(self, project_name: str, role_name: str = "") -> None:
-        ToggleTrackingInteractor(self.project_repo).execute(project_name, role_name)
+        ToggleTrackingInteractor(self.project_storage).execute(project_name, role_name)
 
     def summarize_time(self, period: str, project_name: str = "") -> None:
-        SummarizeTime(self.project_repo).execute(period, project_name)
+        SummarizeTime(self.project_storage).execute(period, project_name)
 
 
-if __name__ == "__main__":
+def main():
     try:
         cli = CommandLineInterface()
         cli.run()
     except Exception as e:
         exit(str(e))
+
+
+if __name__ == "__main__":
+    main()
