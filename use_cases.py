@@ -1,8 +1,7 @@
-import os
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 
-from adapters import ProjectFileRepository
+from adapters import ProjectStorage
 from entities import Project, Role
 from errors import (
     PreviousTimeEntryClosedException,
@@ -13,15 +12,13 @@ from errors import (
 
 
 class InitializeProjectWizard:
-    def __init__(self, project_repo: ProjectFileRepository):
-        self.project_repo = project_repo
+    def __init__(self, project_storage: ProjectStorage):
+        self.project_storage = project_storage
 
     def execute(self):
         print()
         project_name = input("Enter project name: ")
         project = self._find_or_create_project(project_name)
-        project_path = self.project_repo.path(project_name)
-        print(f'\n\tProject "{project}" created at "{project_path}".\n')
 
         role_name = input("Enter a project role: ")
         self._find_or_get_role_name(project, role_name)
@@ -29,20 +26,23 @@ class InitializeProjectWizard:
         if hourly_rate == "":
             hourly_rate = 0
         project.add_role(Role(name=role_name, hourly_rate=int(hourly_rate)))
-        self.project_repo.save(project)
         print(f'\n\tRole "{role_name}" added with rate of ${hourly_rate}/hour.\n')
+        self.project_storage.save(project)
+        print(f'\n\tProject "{project_name}" saved.\n')
         return project
 
     def _find_or_create_project(self, project_name) -> Project:
-        if os.path.exists(self.project_repo.path(project_name)):
+        if self.project_storage.exists(project_name):
             print(f"Project {project_name} already exists.")
             action = input(
                 "Do you want to add a new role/rate or quit? Enter 'role' to add a role or 'quit' to exit: "
             ).lower()
             if action == "quit":
                 raise UserQuitException
-            return self.project_repo.load(project_name)
-        return Project(name=project_name)
+            return self.project_storage.load(project_name)
+        project = Project(name=project_name)
+        print(f'\n\tProject "{project_name}" initialized.\n')
+        return project
 
     def _find_or_get_role_name(self, project, role_name):
         while project.has_role(role_name):
@@ -57,11 +57,11 @@ class InitializeProjectWizard:
 
 
 class ToggleTrackingInteractor:
-    def __init__(self, project_repo: ProjectFileRepository) -> None:
-        self.project_repo = project_repo
+    def __init__(self, project_storage: ProjectStorage) -> None:
+        self.project_storage = project_storage
 
     def execute(self, project_name: str, role_name: str) -> None:
-        project = self.project_repo.load(project_name)
+        project = self.project_storage.load(project_name)
         try:
             role = project.get_role(role_name)
         except RoleNotFoundError:
@@ -74,7 +74,7 @@ class ToggleTrackingInteractor:
         else:
             StartTracking.execute(project, role)
 
-        self.project_repo.save(project)
+        self.project_storage.save(project)
 
 
 class StartTracking:
@@ -104,11 +104,11 @@ class StopTracking:
 
 
 class SummarizeTime:
-    def __init__(self, project_repo: ProjectFileRepository) -> None:
-        self.project_repo = project_repo
+    def __init__(self, project_storage: ProjectStorage) -> None:
+        self.project_storage = project_storage
 
     def execute(self, period: str, project_name: str, precise=False) -> None:
-        project = self.project_repo.load(project_name)
+        project = self.project_storage.load(project_name)
         period_summary: defaultdict = defaultdict(lambda: defaultdict(timedelta))
 
         for time_entry in project.time_entries:

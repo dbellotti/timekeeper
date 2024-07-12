@@ -5,7 +5,7 @@ import unittest
 from datetime import datetime
 from unittest.mock import call, patch
 
-from adapters import ProjectFileRepository
+from adapters import ProjectFileStorage
 from entities import Project, Role, TimeEntry
 from use_cases import (
     InitializeProjectWizard,
@@ -15,31 +15,31 @@ from use_cases import (
 )
 
 
-def destroy_repo(repo_dirname):
-    if os.path.exists(repo_dirname):
-        shutil.rmtree(repo_dirname)
+def destroy_storage(dir):
+    if os.path.exists(dir):
+        shutil.rmtree(dir)
 
 
-class ProjectFileRepositoryTests(unittest.TestCase):
+class ProjectFileStorageTests(unittest.TestCase):
     def setUp(self):
-        self.repo_dirname = "test_repo"
+        self.storage_dir = "test_store"
 
     def tearDown(self):
-        destroy_repo(self.repo_dirname)
+        destroy_storage(self.storage_dir)
 
     def test_init(self):
-        self.assertFalse(os.path.exists(self.repo_dirname))
-        ProjectFileRepository(self.repo_dirname)
-        self.assertTrue(os.path.exists(self.repo_dirname))
+        self.assertFalse(os.path.exists(self.storage_dir))
+        ProjectFileStorage(self.storage_dir)
+        self.assertTrue(os.path.exists(self.storage_dir))
 
     def test_path(self):
         self.assertEqual(
-            ProjectFileRepository(self.repo_dirname).path("foo"),
-            "test_repo/foo.json",
+            ProjectFileStorage(self.storage_dir).path("foo"),
+            "test_store/foo.json",
         )
 
     def test_save_and_load(self):
-        repo = ProjectFileRepository(self.repo_dirname)
+        storage = ProjectFileStorage(self.storage_dir)
         dt = str(datetime.now())
         project = Project(
             name="timekeeper",
@@ -47,8 +47,8 @@ class ProjectFileRepositoryTests(unittest.TestCase):
             time_entries=[TimeEntry(role_name="el jefe", start_time=dt)],
         )
 
-        repo.save(project)
-        with open(repo.path(project.name), "r") as f:
+        storage.save(project)
+        with open(storage.path(project.name), "r") as f:
             project_dict = json.load(f)
 
         self.assertDictEqual(
@@ -66,7 +66,7 @@ class ProjectFileRepositoryTests(unittest.TestCase):
             },
         )
 
-        self.assertEqual(project, repo.load(project))
+        self.assertEqual(project, storage.load(project))
 
 
 class TimeEntryTests(unittest.TestCase):
@@ -77,16 +77,16 @@ class TimeEntryTests(unittest.TestCase):
 
 class InitializeProjectWizardTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.repo_dirname = "test_repo"
+        self.storage_dir = "test_store"
 
     def tearDown(self) -> None:
-        destroy_repo(self.repo_dirname)
+        destroy_storage(self.storage_dir)
 
     @patch("builtins.print")
     @patch("builtins.input", side_effect=["some-project", "some-role", "100"])
     def test_execute(self, mock_input, mock_print) -> None:
         project = InitializeProjectWizard(
-            ProjectFileRepository(self.repo_dirname)
+            ProjectFileStorage(self.storage_dir)
         ).execute()
         self.assertEqual(project.name, "some-project")
         self.assertEqual(project.roles[0].name, "some-role")
@@ -126,12 +126,12 @@ class StopTrackingTests(unittest.TestCase):
 
 class SummarizeTimeTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.repo_dirname = "test_repo"
+        self.storage_dir = "test_store"
         self.project = Project(name="some-project")
-        self.repo = ProjectFileRepository(self.repo_dirname)
+        self.storage = ProjectFileStorage(self.storage_dir)
 
     def tearDown(self) -> None:
-        destroy_repo(self.repo_dirname)
+        destroy_storage(self.storage_dir)
 
     @patch("builtins.print")
     def test_execute(self, mock_print):
@@ -160,9 +160,9 @@ class SummarizeTimeTests(unittest.TestCase):
                 ),
             ]
         )
-        self.repo.save(self.project)
+        self.storage.save(self.project)
 
-        SummarizeTime(self.repo).execute("daily", self.project.name, True)
+        SummarizeTime(self.storage).execute("daily", self.project.name, True)
         self.assertEqual(
             mock_print.call_args_list,
             [

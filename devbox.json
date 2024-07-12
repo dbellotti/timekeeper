@@ -7,7 +7,7 @@
     "ruff@latest"
   ],
   "shell": {
-    "init_hook": ["echo 'Welcome to devbox!' > /dev/null"],
+    "init_hook": ["fish $VENV_DIR/bin/activate.fish"],
     "scripts": {
       "test": ["python -m unittest"],
       "clean": ["nix store gc"]
