@@ -6,7 +6,7 @@ from use_cases import InitializeProjectWizard, SummarizeTime, ToggleTrackingInte
 
 class CommandLineInterface:
     def __init__(self):
-        self.project_repo = ProjectFileStorage(".timekeeper")
+        self.project_storage = ProjectFileStorage(".timekeeper")
 
     def run(self):
         parser = argparse.ArgumentParser(description="Time tracking utility.")
@@ -52,13 +52,13 @@ class CommandLineInterface:
             parser.print_help()
 
     def init_project(self) -> None:
-        InitializeProjectWizard(self.project_repo).execute()
+        InitializeProjectWizard(self.project_storage).execute()
 
     def toggle_tracking(self, project_name: str, role_name: str = "") -> None:
-        ToggleTrackingInteractor(self.project_repo).execute(project_name, role_name)
+        ToggleTrackingInteractor(self.project_storage).execute(project_name, role_name)
 
     def summarize_time(self, period: str, project_name: str = "") -> None:
-        SummarizeTime(self.project_repo).execute(period, project_name)
+        SummarizeTime(self.project_storage).execute(period, project_name)
 
 
 def main():
