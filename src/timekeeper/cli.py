@@ -1,7 +1,11 @@
 import argparse
 
-from adapters import ProjectFileStorage
-from use_cases import InitializeProjectWizard, SummarizeTime, ToggleTrackingInteractor
+from timekeeper.adapters import ProjectFileStorage
+from timekeeper.use_cases import (
+    InitializeProjectWizard,
+    SummarizeTime,
+    ToggleTrackingInteractor,
+)
 
 
 class CommandLineInterface:

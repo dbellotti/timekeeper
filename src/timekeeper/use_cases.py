@@ -1,9 +1,9 @@
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 
-from adapters import ProjectStorage
-from entities import Project, Role
-from errors import (
+from timekeeper.adapters import ProjectStorage
+from timekeeper.entities import Project, Role
+from timekeeper.errors import (
     PreviousTimeEntryClosedException,
     PreviousTimeEntryOpenException,
     RoleNotFoundError,

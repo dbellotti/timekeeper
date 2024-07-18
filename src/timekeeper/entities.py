@@ -1,7 +1,7 @@
 from dataclasses import dataclass, field
 from datetime import datetime
 
-from errors import RoleNotFoundError
+from timekeeper.errors import RoleNotFoundError
 
 
 @dataclass
@@ -51,6 +51,12 @@ class Project:
         return self.name
 
     def get_role(self, role_name: str) -> Role:
+        # self.role_dict = {role.name: role for role in self.roles}
+        # try:
+        #    return self.role_dict[role_name]
+        # except KeyError:
+        #    raise RoleNotFoundError(role_name)
+
         if role_name:
             for role in self.roles:
                 if role.name == role_name:

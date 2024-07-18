@@ -3,8 +3,8 @@ import os
 from abc import ABC, abstractmethod
 from dataclasses import asdict
 
-from entities import Project, Role, TimeEntry
-from errors import ProjectNotFoundError
+from timekeeper.entities import Project, Role, TimeEntry
+from timekeeper.errors import ProjectNotFoundError
 
 
 class ProjectStorage(ABC):

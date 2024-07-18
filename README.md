@@ -2,8 +2,9 @@
 
 Basic time tracking cli for projects and roles. Time entries stored in readable json format.
 
+install locally with `pip install -e .`
 ```console
-$ python3 ./main.py --help
+$ tk
 usage: main.py [-h] {init,toggle,sum} ...
 
 Time tracking utility.
