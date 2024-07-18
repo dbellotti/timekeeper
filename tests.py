@@ -5,9 +5,9 @@ import unittest
 from datetime import datetime
 from unittest.mock import call, patch
 
-from adapters import ProjectFileStorage
-from entities import Project, Role, TimeEntry
-from use_cases import (
+from timekeeper.adapters import ProjectFileStorage
+from timekeeper.entities import Project, Role, TimeEntry
+from timekeeper.use_cases import (
     InitializeProjectWizard,
     StartTracking,
     StopTracking,
@@ -95,7 +95,9 @@ class InitializeProjectWizardTests(unittest.TestCase):
 
 class StartTrackingTests(unittest.TestCase):
     @patch("builtins.print")
-    @patch("entities.TimeEntry.now", return_value=datetime(2023, 1, 1, 12, 0))
+    @patch(
+        "timekeeper.entities.TimeEntry.now", return_value=datetime(2023, 1, 1, 12, 0)
+    )
     def test_execute(self, mock_datetime, mock_print) -> None:
         project = Project(name="some-project")
         role = Role(name="some-role", hourly_rate=100)
@@ -110,7 +112,9 @@ class StartTrackingTests(unittest.TestCase):
 
 class StopTrackingTests(unittest.TestCase):
     @patch("builtins.print")
-    @patch("entities.TimeEntry.now", return_value=datetime(2023, 1, 1, 12, 0))
+    @patch(
+        "timekeeper.entities.TimeEntry.now", return_value=datetime(2023, 1, 1, 12, 0)
+    )
     def test_execute(self, mock_datetime, mock_print) -> None:
         project = Project(name="some-project")
         role = Role(name="some-role", hourly_rate=100)
