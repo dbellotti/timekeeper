@@ -1,7 +1,7 @@
 from collections import defaultdict
 from datetime import date, datetime, timedelta
 
-from timekeeper.adapters import ProjectStorage
+from timekeeper.adapters import ProjectIndex, ProjectStorage
 from timekeeper.entities import Project, Role
 from timekeeper.errors import (
     PreviousTimeEntryClosedException,
@@ -14,16 +14,17 @@ from timekeeper.errors import (
 class InitializeProjectWizard:
     def __init__(self, project_storage: ProjectStorage):
         self.project_storage = project_storage
+        self.project_lookup = ProjectIndex()
 
-    def execute(self):
+    def execute(self) -> Project:
         print()
         project_name = input("Enter project name: ")
         project = self._find_or_create_project(project_name)
 
         role_name = input("Enter a project role: ")
         self._find_or_get_role_name(project, role_name)
-        hourly_rate = input("Enter a hourly rate for this role: ")
-        if hourly_rate == "":
+        hourly_rate_input = input("Enter a hourly rate for this role: ")
+        if hourly_rate_input == "":
             hourly_rate = 0
         project.add_role(Role(name=role_name, hourly_rate=int(hourly_rate)))
         print(f'\n\tRole "{role_name}" added with rate of ${hourly_rate}/hour.\n')
@@ -32,14 +33,18 @@ class InitializeProjectWizard:
         return project
 
     def _find_or_create_project(self, project_name) -> Project:
-        if self.project_storage.exists(project_name):
+        if self.project_lookup.exists(project_name):
             print(f"Project {project_name} already exists.")
             action = input(
                 "Do you want to add a new role/rate or quit? Enter 'role' to add a role or 'quit' to exit: "
             ).lower()
             if action == "quit":
                 raise UserQuitException
+            # Find the path the correct vault before trying to load the project
+            vault_path = self.project_lookup.get_project_vault_path(project_name)
+            self.project_storage.use_vault(vault_path)
             return self.project_storage.load(project_name)
+
         project = Project(name=project_name)
         print(f'\n\tProject "{project_name}" initialized.\n')
         return project
@@ -104,11 +109,7 @@ class StopTracking:
 
 
 class SummarizeTime:
-    def __init__(self, project_storage: ProjectStorage) -> None:
-        self.project_storage = project_storage
-
-    def execute(self, period: str, project_name: str, precise=False) -> None:
-        project = self.project_storage.load(project_name)
+    def execute(self, period: str, project: Project, precise=False) -> None:
         period_summary: defaultdict = defaultdict(lambda: defaultdict(timedelta))
 
         for time_entry in project.time_entries:
@@ -129,7 +130,7 @@ class SummarizeTime:
 
                 period_summary[key][time_entry.role_name] += delta
 
-        print(f'{period} summary for "{project_name}"')
+        print(f'{period} summary for "{project.name}"')
         for key, role_names in sorted(period_summary.items()):
             print(f"\n{key}:")
             for role_name, total_time in role_names.items():
