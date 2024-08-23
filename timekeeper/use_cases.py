@@ -24,10 +24,13 @@ class InitializeProjectWizard:
         role_name = input("Enter a project role: ")
         self._find_or_get_role_name(project, role_name)
         hourly_rate_input = input("Enter a hourly rate for this role: ")
-        if hourly_rate_input == "":
+        try:
+            hourly_rate = int(hourly_rate_input or 0)
+        except ValueError:
             hourly_rate = 0
-        project.add_role(Role(name=role_name, hourly_rate=int(hourly_rate)))
+        project.add_role(Role(name=role_name, hourly_rate=hourly_rate))
         print(f'\n\tRole "{role_name}" added with rate of ${hourly_rate}/hour.\n')
+
         self.project_storage.save(project)
         print(f'\n\tProject "{project_name}" saved.\n')
         return project

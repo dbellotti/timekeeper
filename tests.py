@@ -130,12 +130,7 @@ class StopTrackingTests(unittest.TestCase):
 
 class SummarizeTimeTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.storage_dir = "test_store"
         self.project = Project(name="some-project")
-        self.storage = ProjectFileStorage(self.storage_dir)
-
-    def tearDown(self) -> None:
-        destroy_storage(self.storage_dir)
 
     @patch("builtins.print")
     def test_execute(self, mock_print):
@@ -164,9 +159,8 @@ class SummarizeTimeTests(unittest.TestCase):
                 ),
             ]
         )
-        self.storage.save(self.project)
 
-        SummarizeTime(self.storage).execute("daily", self.project.name, True)
+        SummarizeTime().execute("daily", self.project, True)
         self.assertEqual(
             mock_print.call_args_list,
             [
