@@ -80,9 +80,9 @@ class CommandLineInterface:
     def toggle_tracking(self, project_name: str, role_name: str = "") -> None:
         vault_path = ProjectIndex().get_project_vault_path(project_name)
         project_storage = ProjectFileStorage(vault_path)
-        # TODO try to replace usage of the storage with the project object
-        # project = ProjectFileStorage(vault_path).load(project_name)
-        ToggleTrackingInteractor(project_storage).execute(project_name, role_name)
+        project = project_storage.load(project_name)
+        ToggleTrackingInteractor().execute(project, role_name)
+        project_storage.save(project)
 
     def summarize_time(self, period: str, project_name: str = "") -> None:
         vault_path = ProjectIndex().get_project_vault_path(project_name)

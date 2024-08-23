@@ -65,24 +65,18 @@ class InitializeProjectWizard:
 
 
 class ToggleTrackingInteractor:
-    def __init__(self, project_storage: ProjectStorage) -> None:
-        self.project_storage = project_storage
-
-    def execute(self, project_name: str, role_name: str) -> None:
-        project = self.project_storage.load(project_name)
+    def execute(self, project: Project, role_name: str) -> None:
         try:
             role = project.get_role(role_name)
         except RoleNotFoundError:
-            print(f"Role {role_name} not found in project {project_name}.")
+            print(f"Role {role_name} not found in project {project.name}.")
             role = project.get_default_role()
-            print(f"Defaulted to role {role.name}.")
+            print(f"Defaulted to role '{role.name}'.")
 
         if project.last_time_entry(role.name).is_open():
             StopTracking.execute(project, role)
         else:
             StartTracking.execute(project, role)
-
-        self.project_storage.save(project)
 
 
 class StartTracking:
