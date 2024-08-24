@@ -10,5 +10,5 @@ def config_path():
     return os.path.join(root_path, ".config")
 
 
-def get_projects_path():
+def projects_path():
     return os.path.join(config_path(), VAULT_DIRECTORY)

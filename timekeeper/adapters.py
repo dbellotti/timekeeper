@@ -3,14 +3,14 @@ import os
 from abc import ABC, abstractmethod
 from dataclasses import asdict
 
-from timekeeper.config import INDEX_FILENAME, get_projects_path
+from timekeeper.config import INDEX_FILENAME, projects_path
 from timekeeper.entities import Project, Role, TimeEntry
 from timekeeper.errors import ProjectNotFoundError
 
 
 class ProjectIndex:
     def __init__(self):
-        self.projects_path = get_projects_path()
+        self.projects_path = projects_path()
         self.lookup_filename = INDEX_FILENAME
         self.lookup_file = f"{self.projects_path}/{self.lookup_filename}"
 
