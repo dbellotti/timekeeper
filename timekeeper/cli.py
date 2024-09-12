@@ -43,6 +43,10 @@ class CommandLineInterface:
             "--project", type=str, help="Display sum for specific project."
         )
 
+        # info subcommand
+        parser_info = subparsers.add_parser("info", help="Show project info.")
+        parser_info.add_argument("project_name", type=str, help="Name of the project.")
+
         # helper subcommands
         subparsers.add_parser("projects", help="List all projects.", aliases=["p"])
         subparsers.add_parser("vaults", help="List all vaults.", aliases=["v"])
@@ -62,6 +66,8 @@ class CommandLineInterface:
             print(ProjectIndex().list_vaults())
         elif args.command in ["index", "i"]:
             print(json.dumps(ProjectIndex().get_index(), indent=2))
+        elif args.command == "info":
+            self.project_info(args.project_name)
         else:
             parser.print_help()
 
@@ -81,6 +87,15 @@ class CommandLineInterface:
         vault_path = ProjectIndex().get_project_vault_path(project_name)
         project = ProjectFileStorage(vault_path).load(project_name)
         SummarizeTime().execute(period, project)
+
+    def project_info(self, project_name: str) -> None:
+        vault_path = ProjectIndex().get_project_vault_path(project_name)
+        project_storage = ProjectFileStorage(vault_path)
+        project = project_storage.load(project_name)
+        if project.last_time_entry().is_open():
+            print("Timer Running.")
+        else:
+            print("No timer running.")
 
 
 def main():
