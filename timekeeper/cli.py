@@ -2,9 +2,9 @@ import argparse
 import json
 
 from timekeeper.adapters import ProjectFileStorage, ProjectIndex
-from timekeeper.config import projects_path
 from timekeeper.use_cases import (
     InitializeProjectWizard,
+    InitializeVaultWizard,
     SummarizeTime,
     ToggleTrackingInteractor,
 )
@@ -66,14 +66,7 @@ class CommandLineInterface:
             parser.print_help()
 
     def init_project(self) -> None:
-        default_path = projects_path()
-        project_path = (
-            input(
-                f"Where would you like your project to be stored? Press Enter to use {default_path}: ",
-            )
-            or default_path
-        )
-        project_storage = ProjectFileStorage(project_path)
+        project_storage = InitializeVaultWizard(ProjectFileStorage).execute()
         project = InitializeProjectWizard(project_storage).execute()
         ProjectIndex().update_index(project_storage.base_path, project.name)
 

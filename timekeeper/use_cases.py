@@ -1,7 +1,9 @@
 from collections import defaultdict
 from datetime import date, datetime, timedelta
+from typing import Type
 
 from timekeeper.adapters import ProjectIndex, ProjectStorage
+from timekeeper.config import projects_path
 from timekeeper.entities import Project, Role
 from timekeeper.errors import (
     PreviousTimeEntryClosedException,
@@ -9,6 +11,21 @@ from timekeeper.errors import (
     RoleNotFoundError,
     UserQuitException,
 )
+
+
+class InitializeVaultWizard:
+    def __init__(self, project_storage_class: Type[ProjectStorage]) -> None:
+        self.project_storage_class = project_storage_class
+
+    def execute(self) -> ProjectStorage:
+        default_path = projects_path()
+        project_path = (
+            input(
+                f"Where would you like your project to be stored? Press Enter to use {default_path}: ",
+            )
+            or default_path
+        )
+        return self.project_storage_class(project_path)
 
 
 class InitializeProjectWizard:
@@ -31,8 +48,11 @@ class InitializeProjectWizard:
         project.add_role(Role(name=role_name, hourly_rate=hourly_rate))
         print(f'\n\tRole "{role_name}" added with rate of ${hourly_rate}/hour.\n')
 
+        return self._save_project(project)
+
+    def _save_project(self, project) -> Project:
         self.project_storage.save(project)
-        print(f'\n\tProject "{project_name}" saved.\n')
+        print(f'\n\tProject "{project.name}" saved.\n')
         return project
 
     def _find_or_create_project(self, project_name) -> Project:

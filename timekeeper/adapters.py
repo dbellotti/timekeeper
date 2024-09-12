@@ -80,6 +80,11 @@ class ProjectStorage(ABC):
     """Abstract class for a project repository backend"""
 
     @abstractmethod
+    def __init__(self, base_path: str):
+        """Initialize the storage backend"""
+        self.base_path = base_path
+
+    @abstractmethod
     def use_vault(self, vault: str) -> None:
         """Set the vault to use"""
 
