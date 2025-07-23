@@ -5,10 +5,12 @@ import unittest
 from datetime import datetime
 from unittest.mock import call, patch
 
-from timekeeper.adapters import ProjectFileStorage
+from timekeeper.adapters import FileVault
 from timekeeper.entities import Project, Role, TimeEntry
 from timekeeper.use_cases import (
-    InitializeProjectWizard,
+    InitializeProject,
+    InitializeRole,
+    SaveProject,
     StartTracking,
     StopTracking,
     SummarizeTime,
@@ -29,17 +31,17 @@ class ProjectFileStorageTests(unittest.TestCase):
 
     def test_init(self):
         self.assertFalse(os.path.exists(self.storage_dir))
-        ProjectFileStorage(self.storage_dir)
+        FileVault(self.storage_dir)
         self.assertTrue(os.path.exists(self.storage_dir))
 
     def test_path(self):
         self.assertEqual(
-            ProjectFileStorage(self.storage_dir).path("foo"),
+            FileVault(self.storage_dir).path("foo"),
             "test_store/foo.json",
         )
 
     def test_save_and_load(self):
-        storage = ProjectFileStorage(self.storage_dir)
+        storage = FileVault(self.storage_dir)
         dt = str(datetime.now())
         project = Project(
             name="timekeeper",
@@ -75,7 +77,7 @@ class TimeEntryTests(unittest.TestCase):
         self.assertTrue(TimeEntry(role_name="el jefe"))
 
 
-class InitializeProjectWizardTests(unittest.TestCase):
+class InitializeProjectTests(unittest.TestCase):
     def setUp(self) -> None:
         self.storage_dir = "test_store"
 
@@ -85,9 +87,10 @@ class InitializeProjectWizardTests(unittest.TestCase):
     @patch("builtins.print")
     @patch("builtins.input", side_effect=["some-project", "some-role", "100"])
     def test_execute(self, mock_input, mock_print) -> None:
-        project = InitializeProjectWizard(
-            ProjectFileStorage(self.storage_dir)
-        ).execute()
+        vault = FileVault(self.storage_dir)
+        project = InitializeProject(vault).execute()
+        project = InitializeRole(vault, project).execute()
+        project = SaveProject(vault, project).execute()
         self.assertEqual(project.name, "some-project")
         self.assertEqual(project.roles[0].name, "some-role")
         self.assertEqual(project.roles[0].hourly_rate, 100)

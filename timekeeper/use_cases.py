@@ -2,8 +2,8 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from typing import Type
 
-from timekeeper.adapters import ProjectIndex, ProjectStorage
-from timekeeper.config import projects_path
+from timekeeper.adapters import ProjectRegistry, VaultAdapter
+from timekeeper.config import vault_path
 from timekeeper.entities import Project, Role
 from timekeeper.errors import (
     PreviousTimeEntryClosedException,
@@ -13,49 +13,41 @@ from timekeeper.errors import (
 )
 
 
-class InitializeVaultWizard:
-    def __init__(self, project_storage_class: Type[ProjectStorage]) -> None:
-        self.project_storage_class = project_storage_class
+class InitializeVault:
+    def __init__(self, vault_adapter_class: Type[VaultAdapter]) -> None:
+        self.vault_adapter_class = vault_adapter_class
 
-    def execute(self) -> ProjectStorage:
-        default_path = projects_path()
+    def execute(self) -> VaultAdapter:
+        default_path = vault_path()
         project_path = (
             input(
                 f"Where would you like your project to be stored? Press Enter to use {default_path}: ",
             )
             or default_path
         )
-        return self.project_storage_class(project_path)
+        return self.vault_adapter_class(project_path)
 
 
-class InitializeProjectWizard:
-    def __init__(self, project_storage: ProjectStorage):
-        self.project_storage = project_storage
-        self.project_lookup = ProjectIndex()
+class InitializeProject:
+    def __init__(self, vault: VaultAdapter):
+        self.vault = vault
+        self.project_lookup = ProjectRegistry()
 
     def execute(self) -> Project:
         print()
         project_name = input("Enter project name: ")
         project = self._find_or_create_project(project_name)
 
-        role_name = input("Enter a project role: ")
-        self._find_or_get_role_name(project, role_name)
-        hourly_rate_input = input("Enter a hourly rate for this role: ")
-        try:
-            hourly_rate = int(hourly_rate_input or 0)
-        except ValueError:
-            hourly_rate = 0
-        project.add_role(Role(name=role_name, hourly_rate=hourly_rate))
-        print(f'\n\tRole "{role_name}" added with rate of ${hourly_rate}/hour.\n')
-
-        return self._save_project(project)
-
-    def _save_project(self, project) -> Project:
-        self.project_storage.save(project)
-        print(f'\n\tProject "{project.name}" saved.\n')
         return project
 
     def _find_or_create_project(self, project_name) -> Project:
+        # TODO if we can get ProjectRegistry() out of this class it would be nice
+        # currently the lookup only allows for unique project names but there could
+        # be duplicate project names across vaults if we wanted, but we would have to
+        # change how the lookup stores the vault paths and project names and we would
+        # need potentially need the vault path and the project name when doing commands
+        # like toggle which look up the project by name. Maybe if it finds multiple
+        # projects with the same name it could ask the user which vault they want to use?
         if self.project_lookup.exists(project_name):
             print(f"Project {project_name} already exists.")
             action = input(
@@ -65,12 +57,31 @@ class InitializeProjectWizard:
                 raise UserQuitException
             # Find the path the correct vault before trying to load the project
             vault_path = self.project_lookup.get_project_vault_path(project_name)
-            self.project_storage.use_vault(vault_path)
-            return self.project_storage.load(project_name)
+            self.vault.use_vault(vault_path)
+            return self.vault.load(project_name)
 
         project = Project(name=project_name)
         print(f'\n\tProject "{project_name}" initialized.\n')
         return project
+
+
+class InitializeRole:
+    def __init__(self, vault: VaultAdapter, project: Project):
+        self.vault = vault
+        self.project = project
+
+    def execute(self) -> Project:
+        role_name = input("Enter a project role: ")
+        self._find_or_get_role_name(self.project, role_name)
+        hourly_rate_input = input("Enter a hourly rate for this role: ")
+        try:
+            hourly_rate = int(hourly_rate_input or 0)
+        except ValueError:
+            hourly_rate = 0
+        self.project.add_role(Role(name=role_name, hourly_rate=hourly_rate))
+        print(f'\n\tRole "{role_name}" added with rate of ${hourly_rate}/hour.\n')
+
+        return self.project
 
     def _find_or_get_role_name(self, project, role_name):
         while project.has_role(role_name):
@@ -82,6 +93,17 @@ class InitializeProjectWizard:
                 raise UserQuitException
             else:
                 return role_name
+
+
+class SaveProject:
+    def __init__(self, vault: VaultAdapter, project: Project):
+        self.vault = vault
+        self.project = project
+
+    def execute(self) -> Project:
+        self.vault.save(self.project)
+        print(f'\n\tProject "{self.project.name}" saved.\n')
+        return self.project
 
 
 class ToggleTrackingInteractor:

@@ -3,14 +3,14 @@ import os
 from abc import ABC, abstractmethod
 from dataclasses import asdict
 
-from timekeeper.config import INDEX_FILENAME, projects_path
+from timekeeper.config import INDEX_FILENAME, vault_path
 from timekeeper.entities import Project, Role, TimeEntry
 from timekeeper.errors import ProjectNotFoundError
 
 
-class ProjectIndex:
+class ProjectRegistry:
     def __init__(self):
-        self.projects_path = projects_path()
+        self.projects_path = vault_path()
         self.lookup_filename = INDEX_FILENAME
         self.lookup_file = f"{self.projects_path}/{self.lookup_filename}"
 
@@ -76,8 +76,8 @@ class ProjectIndex:
             raise ProjectNotFoundError(project_name)
 
 
-class ProjectStorage(ABC):
-    """Abstract class for a project repository backend"""
+class VaultAdapter(ABC):
+    """Abstract interface for vault storage backends"""
 
     @abstractmethod
     def __init__(self, base_path: str):
@@ -101,7 +101,7 @@ class ProjectStorage(ABC):
         """Check if a project exists"""
 
 
-class ProjectFileStorage(ProjectStorage):
+class FileVault(VaultAdapter):
     def __init__(self, base_path):
         os.makedirs(base_path, exist_ok=True)
         self.base_path = base_path
