@@ -2,7 +2,7 @@ from collections import defaultdict
 from datetime import date, datetime, timedelta
 from typing import Type
 
-from timekeeper.adapters import ProjectRegistry, VaultAdapter
+from timekeeper.adapters import VaultAdapter
 from timekeeper.config import vault_path
 from timekeeper.entities import Project, Role
 from timekeeper.errors import (
@@ -29,37 +29,7 @@ class InitializeVault:
 
 
 class InitializeProject:
-    def __init__(self, vault: VaultAdapter):
-        self.vault = vault
-        self.project_lookup = ProjectRegistry()
-
-    def execute(self) -> Project:
-        print()
-        project_name = input("Enter project name: ")
-        project = self._find_or_create_project(project_name)
-
-        return project
-
-    def _find_or_create_project(self, project_name) -> Project:
-        # TODO if we can get ProjectRegistry() out of this class it would be nice
-        # currently the lookup only allows for unique project names but there could
-        # be duplicate project names across vaults if we wanted, but we would have to
-        # change how the lookup stores the vault paths and project names and we would
-        # need potentially need the vault path and the project name when doing commands
-        # like toggle which look up the project by name. Maybe if it finds multiple
-        # projects with the same name it could ask the user which vault they want to use?
-        if self.project_lookup.exists(project_name):
-            print(f"Project {project_name} already exists.")
-            action = input(
-                "Do you want to add a new role/rate or quit? Enter 'role' to add a role or 'quit' to exit: "
-            ).lower()
-            if action == "quit":
-                raise UserQuitException
-            # Find the path the correct vault before trying to load the project
-            vault_path = self.project_lookup.get_project_vault_path(project_name)
-            self.vault.use_vault(vault_path)
-            return self.vault.load(project_name)
-
+    def execute(self, project_name: str) -> Project:
         project = Project(name=project_name)
         print(f'\n\tProject "{project_name}" initialized.\n')
         return project

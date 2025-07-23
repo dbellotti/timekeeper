@@ -2,10 +2,9 @@ import argparse
 import json
 
 from timekeeper.adapters import FileVault, ProjectRegistry
+from timekeeper.services import ProjectWorkflowService
 from timekeeper.use_cases import (
-    InitializeProject,
     InitializeRole,
-    InitializeVault,
     SaveProject,
     SummarizeTime,
     ToggleTrackingInteractor,
@@ -84,11 +83,7 @@ class CommandLineInterface:
             parser.print_help()
 
     def init_project(self) -> None:
-        vault = InitializeVault(FileVault).execute()
-        project = InitializeProject(vault).execute()
-        project = InitializeRole(vault, project).execute()
-        project = SaveProject(vault, project).execute()
-        ProjectRegistry().update_index(vault.base_path, project.name)
+        ProjectWorkflowService().initialize_project_workflow()
 
     def toggle_tracking(self, project_name: str, role_name: str = "") -> None:
         vault_path = ProjectRegistry().get_project_vault_path(project_name)

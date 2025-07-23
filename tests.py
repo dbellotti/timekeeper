@@ -9,8 +9,6 @@ from timekeeper.adapters import FileVault
 from timekeeper.entities import Project, Role, TimeEntry
 from timekeeper.use_cases import (
     InitializeProject,
-    InitializeRole,
-    SaveProject,
     StartTracking,
     StopTracking,
     SummarizeTime,
@@ -85,15 +83,12 @@ class InitializeProjectTests(unittest.TestCase):
         destroy_storage(self.storage_dir)
 
     @patch("builtins.print")
-    @patch("builtins.input", side_effect=["some-project", "some-role", "100"])
-    def test_execute(self, mock_input, mock_print) -> None:
-        vault = FileVault(self.storage_dir)
-        project = InitializeProject(vault).execute()
-        project = InitializeRole(vault, project).execute()
-        project = SaveProject(vault, project).execute()
+    def test_execute(self, mock_print) -> None:
+        project = InitializeProject().execute("some-project")
         self.assertEqual(project.name, "some-project")
-        self.assertEqual(project.roles[0].name, "some-role")
-        self.assertEqual(project.roles[0].hourly_rate, 100)
+        self.assertEqual(
+            len(project.roles), 0
+        )  # InitializeProject doesn't add roles anymore
 
 
 class StartTrackingTests(unittest.TestCase):

@@ -45,19 +45,22 @@ The codebase uses Clean Architecture with clear layer separation:
 - `FileVault`: JSON file storage implementation
 - `ProjectRegistry`: Global index mapping project names to vault locations
 
-**Use Cases** (`use_cases.py`): Business logic
-- `InitializeVault/Project/Role`: Setup workflows
+**Use Cases** (`use_cases.py`): Pure business logic
+- `InitializeVault/Project/Role`: Atomic business operations
 - `ToggleTrackingInteractor`: Start/stop time tracking
 - `SummarizeTime`: Generate time reports
 - `StartTracking/StopTracking`: Core timing operations
 
-**CLI** (`cli.py`): User interface orchestrating use cases
+**Application Services** (`services.py`): Workflow orchestration
+- `ProjectWorkflowService`: Coordinates complex project initialization workflows
+
+**CLI** (`cli.py`): User interface delegating to services
 
 ## Key Concepts
 
 **Vaults**: Storage directories containing project JSON files. Projects can live in different vaults, tracked by a global registry at `~/.config/timekeeper/lookup.json`.
 
-**Multi-Step Initialization**: Project creation follows `InitializeVault` → `InitializeProject` → `InitializeRole` → `SaveProject` chain for better separation of concerns.
+**Application Services**: Complex workflows like project initialization are orchestrated by application services, keeping use cases pure and focused on single responsibilities.
 
 ## Testing
 
