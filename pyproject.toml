@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "timekeeper"
-version = "0.5.0"
+version = "0.6.0"
 authors = [
   { name="David Bellotti" },
 ]
-description="A simple time tracking tool"
+description="A flexible time tracking CLI with role-based rates and custom vault directories"
 readme = "README.md"
 requires-python = ">=3.9"
 classifiers = [

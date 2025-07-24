@@ -5,7 +5,8 @@
     "mypy@latest",
     "pre-commit@latest",
     "ruff@latest",
-    "claude-code@latest"
+    "claude-code@latest",
+    "github-cli@latest"
   ],
   "shell": {
     "init_hook": ["fish $VENV_DIR/bin/activate.fish"],
