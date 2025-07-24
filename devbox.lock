@@ -1,6 +1,60 @@
 {
   "lockfile_version": "1",
   "packages": {
+    "claude-code@latest": {
+      "last_modified": "2025-07-21T09:58:03Z",
+      "resolved": "github:NixOS/nixpkgs/2baf8e1658cba84a032c3a8befb1e7b06629242a#claude-code",
+      "source": "devbox-search",
+      "version": "1.0.56",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/zw4s5k1bsyk9ymspwkm3n6icrh7wlq70-claude-code-1.0.56",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/zw4s5k1bsyk9ymspwkm3n6icrh7wlq70-claude-code-1.0.56"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/kp3l85f4xk1k1y84fvm9r7mfvmj76q6r-claude-code-1.0.56",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/kp3l85f4xk1k1y84fvm9r7mfvmj76q6r-claude-code-1.0.56"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/q5x14w30nrsn8kb7iyv4din8mj74d3ar-claude-code-1.0.56",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/q5x14w30nrsn8kb7iyv4din8mj74d3ar-claude-code-1.0.56"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/99jfzw8x1r46g2cy4h359nynv9kysxic-claude-code-1.0.56",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/99jfzw8x1r46g2cy4h359nynv9kysxic-claude-code-1.0.56"
+        }
+      }
+    },
+    "github-cli@latest": {
+      "last_modified": "2023-02-24T09:01:09Z",
+      "resolved": "github:NixOS/nixpkgs/7d0ed7f2e5aea07ab22ccb338d27fbe347ed2f11#github-cli",
+      "source": "devbox-search",
+      "version": "2.23.0"
+    },
     "mypy@latest": {
       "last_modified": "2024-03-22T11:26:23Z",
       "resolved": "github:NixOS/nixpkgs/a3ed7406349a9335cb4c2a71369b697cecd9d351#mypy",
@@ -131,7 +185,7 @@
     },
     "python@3.12": {
       "last_modified": "2024-03-22T11:26:23Z",
-      "plugin_version": "0.0.3",
+      "plugin_version": "0.0.4",
       "resolved": "github:NixOS/nixpkgs/a3ed7406349a9335cb4c2a71369b697cecd9d351#python312",
       "source": "devbox-search",
       "version": "3.12.2",

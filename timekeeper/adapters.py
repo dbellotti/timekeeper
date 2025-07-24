@@ -3,12 +3,90 @@ import os
 from abc import ABC, abstractmethod
 from dataclasses import asdict
 
+from timekeeper.config import INDEX_FILENAME, vault_path
 from timekeeper.entities import Project, Role, TimeEntry
 from timekeeper.errors import ProjectNotFoundError
 
 
-class ProjectStorage(ABC):
-    """Abstract class for a project repository backend"""
+class ProjectRegistry:
+    def __init__(self):
+        self.projects_path = vault_path()
+        self.lookup_filename = INDEX_FILENAME
+        self.lookup_file = f"{self.projects_path}/{self.lookup_filename}"
+
+        if not os.path.exists(self.projects_path):
+            os.makedirs(self.projects_path)
+
+        if not os.path.exists(self.lookup_file):
+            self._index_projects()
+
+    def _load_index(self) -> dict:
+        with open(self.lookup_file, "r") as f:
+            return json.load(f)
+
+    def _save_index(self, projects_dict: dict) -> None:
+        with open(self.lookup_file, "w") as f:
+            json.dump(projects_dict, f, indent=4)
+
+    def _index_projects(self, projects_path: str = "") -> None:
+        projects_path = projects_path or self.projects_path
+
+        projects_dict: dict = {"projects": {}}
+        files = os.listdir(projects_path)
+
+        # check if the project file exists
+        for file in files:
+            if file not in [self.lookup_filename, ".DS_Store"]:
+                projects_dict["projects"][file.split(".")[0]] = os.path.abspath(
+                    f"{projects_path}/{file}"
+                )
+
+        self._save_index(projects_dict)
+
+    def get_index(self) -> dict:
+        return self._load_index()
+
+    def update_index(self, project_path: str, project_name: str) -> None:
+        projects_dict = self._load_index()
+        projects_dict["projects"][project_name] = f"{project_path}/{project_name}.json"
+        self._save_index(projects_dict)
+
+    def list_vaults(self) -> list:
+        return list(
+            set(
+                [
+                    os.path.dirname(file_path)
+                    for file_path in self._load_index()["projects"].values()
+                ]
+            )
+        )
+
+    def list_projects(self) -> list:
+        return list(self._load_index()["projects"].keys())
+
+    def exists(self, project_name: str) -> bool:
+        return project_name in self.list_projects()
+
+    def get_project_vault_path(self, project_name: str) -> str:
+        try:
+            project_filepath = self._load_index()["projects"][project_name]
+            # return the directory "vault" of the project file
+            return str(os.path.dirname(project_filepath))
+        except KeyError:
+            raise ProjectNotFoundError(project_name)
+
+
+class VaultAdapter(ABC):
+    """Abstract interface for vault storage backends"""
+
+    @abstractmethod
+    def __init__(self, base_path: str):
+        """Initialize the storage backend"""
+        self.base_path = base_path
+
+    @abstractmethod
+    def use_vault(self, vault: str) -> None:
+        """Set the vault to use"""
 
     @abstractmethod
     def load(self, project_name: str) -> Project:
@@ -23,11 +101,13 @@ class ProjectStorage(ABC):
         """Check if a project exists"""
 
 
-class ProjectFileStorage(ProjectStorage):
+class FileVault(VaultAdapter):
     def __init__(self, base_path):
-        if not os.path.exists(base_path):
-            os.makedirs(base_path)
+        os.makedirs(base_path, exist_ok=True)
         self.base_path = base_path
+
+    def use_vault(self, vault_path: str) -> None:
+        self.base_path = vault_path
 
     def path(self, project_name: str) -> str:
         return f"{self.base_path}/{project_name}.json"

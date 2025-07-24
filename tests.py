@@ -5,10 +5,10 @@ import unittest
 from datetime import datetime
 from unittest.mock import call, patch
 
-from timekeeper.adapters import ProjectFileStorage
+from timekeeper.adapters import FileVault
 from timekeeper.entities import Project, Role, TimeEntry
 from timekeeper.use_cases import (
-    InitializeProjectWizard,
+    InitializeProject,
     StartTracking,
     StopTracking,
     SummarizeTime,
@@ -29,17 +29,17 @@ class ProjectFileStorageTests(unittest.TestCase):
 
     def test_init(self):
         self.assertFalse(os.path.exists(self.storage_dir))
-        ProjectFileStorage(self.storage_dir)
+        FileVault(self.storage_dir)
         self.assertTrue(os.path.exists(self.storage_dir))
 
     def test_path(self):
         self.assertEqual(
-            ProjectFileStorage(self.storage_dir).path("foo"),
+            FileVault(self.storage_dir).path("foo"),
             "test_store/foo.json",
         )
 
     def test_save_and_load(self):
-        storage = ProjectFileStorage(self.storage_dir)
+        storage = FileVault(self.storage_dir)
         dt = str(datetime.now())
         project = Project(
             name="timekeeper",
@@ -75,7 +75,7 @@ class TimeEntryTests(unittest.TestCase):
         self.assertTrue(TimeEntry(role_name="el jefe"))
 
 
-class InitializeProjectWizardTests(unittest.TestCase):
+class InitializeProjectTests(unittest.TestCase):
     def setUp(self) -> None:
         self.storage_dir = "test_store"
 
@@ -83,14 +83,12 @@ class InitializeProjectWizardTests(unittest.TestCase):
         destroy_storage(self.storage_dir)
 
     @patch("builtins.print")
-    @patch("builtins.input", side_effect=["some-project", "some-role", "100"])
-    def test_execute(self, mock_input, mock_print) -> None:
-        project = InitializeProjectWizard(
-            ProjectFileStorage(self.storage_dir)
-        ).execute()
+    def test_execute(self, mock_print) -> None:
+        project = InitializeProject().execute("some-project")
         self.assertEqual(project.name, "some-project")
-        self.assertEqual(project.roles[0].name, "some-role")
-        self.assertEqual(project.roles[0].hourly_rate, 100)
+        self.assertEqual(
+            len(project.roles), 0
+        )  # InitializeProject doesn't add roles anymore
 
 
 class StartTrackingTests(unittest.TestCase):
@@ -130,12 +128,7 @@ class StopTrackingTests(unittest.TestCase):
 
 class SummarizeTimeTests(unittest.TestCase):
     def setUp(self) -> None:
-        self.storage_dir = "test_store"
         self.project = Project(name="some-project")
-        self.storage = ProjectFileStorage(self.storage_dir)
-
-    def tearDown(self) -> None:
-        destroy_storage(self.storage_dir)
 
     @patch("builtins.print")
     def test_execute(self, mock_print):
@@ -164,9 +157,8 @@ class SummarizeTimeTests(unittest.TestCase):
                 ),
             ]
         )
-        self.storage.save(self.project)
 
-        SummarizeTime(self.storage).execute("daily", self.project.name, True)
+        SummarizeTime().execute("daily", self.project, True)
         self.assertEqual(
             mock_print.call_args_list,
             [

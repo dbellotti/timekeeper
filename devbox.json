@@ -4,12 +4,14 @@
     "python@3.12",
     "mypy@latest",
     "pre-commit@latest",
-    "ruff@latest"
+    "ruff@latest",
+    "claude-code@latest",
+    "github-cli@latest"
   ],
   "shell": {
     "init_hook": ["fish $VENV_DIR/bin/activate.fish"],
     "scripts": {
-      "test": ["python -m unittest"],
+      "test":  ["python -m unittest"],
       "clean": ["nix store gc"]
     }
   }
